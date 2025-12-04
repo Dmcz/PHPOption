@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dmcz\Option;
 
 use LogicException;
+use Throwable;
 
 /**
  * @extends Option<never>
@@ -47,7 +48,7 @@ final class None extends Option
     /**
      * @template D
      * @param null|(callable():D)|D $default
-     * @return D|null
+     * @return null|D
      *
      * @throws LogicException
      */
@@ -123,10 +124,10 @@ final class None extends Option
     }
 
     /**
-     * @param null|callable():\Throwable $exceptionFactory
+     * @param null|callable():Throwable $exceptionFactory
      * @return never
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function getOrThrow(?callable $exceptionFactory = null): mixed
     {

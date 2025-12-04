@@ -61,7 +61,7 @@ final class OptionTest extends TestCase
     }
 
     public function testMapAndFlatMap(): void
-    {   
+    {
         /** @var Option<int> $mapped */
         $mapped = Option::some(2)->map(fn (int $v): int => $v * 2);
         self::assertTrue($mapped->isSome());
