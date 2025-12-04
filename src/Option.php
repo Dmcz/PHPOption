@@ -4,89 +4,113 @@ declare(strict_types=1);
 
 namespace Dmcz\Option;
 
-use LogicException;
+use Throwable;
 
 /**
- * @template-covariant T
+ * @template T
  */
-final class Option
+abstract class Option
 {
-    /**
-     * Internal constructor; prefer the named constructors.
-     *
-     * @param T $value
-     */
-    private function __construct(
+    protected function __construct(
         public readonly Tag $tag,
-        private readonly mixed $value = null,
     ) {
     }
 
     /**
-     * Create an Option that holds a concrete value.
+     * 创建一个包含值的 Some。
      *
      * @template S
      * @param S $value
-     * @return self<S>
+     * @return Option<S>
      */
-    public static function some(mixed $value): self
+    public static function some(mixed $value): Option
     {
-        return new self(Tag::Some, $value);
+        return new Some($value);
     }
 
     /**
-     * Create an Option that holds no value.
+     * 创建一个 None。
      *
-     * @return self<never>
+     * @return Option<never>
      */
-    public static function none(): self
+    public static function none(): Option
     {
-        /** @var self<never> */
-        return new self(Tag::None);
+        return None::instance();
     }
 
-    /**
-     * Whether the Option currently holds a value.
-     */
-    public function isSome(): bool
-    {
-        return $this->tag === Tag::Some;
-    }
+    abstract public function isSome(): bool;
+
+    abstract public function isNone(): bool;
 
     /**
-     * Whether the Option is empty.
-     */
-    public function isNone(): bool
-    {
-        return $this->tag === Tag::None;
-    }
-
-    /**
-     * Return the contained value or a default.
-     *
-     * When called on None with no default, a LogicException is thrown.
-     * If a callable default is provided, it is invoked lazily only for None.
+     * 获取内部值或默认值；当 None 且未提供默认值时抛出异常。
      *
      * @template D
      * @param null|(callable():D)|D $default
      * @return null|D|T
      */
-    public function unwrap(mixed $default = null): mixed
-    {
-        if ($this->isSome()) {
-            return $this->value;
-        }
+    abstract public function unwrap(mixed $default = null): mixed;
 
-        // Throw an exception if no passed.
-        if (func_num_args() === 0) {
-            throw new LogicException('Tried to unwrap None');
-        }
+    /**
+     * @template U
+     * @param callable(T):U $mapper
+     * @return Option<U>
+     */
+    abstract public function map(callable $mapper): self;
 
-        // support lazily
-        if (is_callable($default)) {
-            return $default();
-        }
+    /**
+     * @template U
+     * @param callable(T):Option<U> $mapper
+     * @return Option<U>
+     */
+    abstract public function flatMap(callable $mapper): self;
 
-        return $default;
-    }
+    /**
+     * @param callable(T):bool $predicate
+     * @return Option<T>
+     */
+    abstract public function filter(callable $predicate): self;
+
+    /**
+     * @template S
+     * @param callable():Option<S>|Option<S> $fallback
+     * @return Option<S|T>
+     */
+    abstract public function orElse(callable|Option $fallback): self;
+
+    /**
+     * 获取内部值或返回备用值。
+     *
+     * @template D
+     * @param callable():D|D $default
+     * @return D|T
+     */
+    abstract public function getOrElse(mixed $default): mixed;
+
+    /**
+     * 获取内部值；当 None 时抛出异常。
+     *
+     * @param null|callable():Throwable $exceptionFactory
+     * @return T
+     */
+    abstract public function getOrThrow(?callable $exceptionFactory = null): mixed;
+
+    /**
+     * 模式匹配。
+     *
+     * @template S
+     * @template N
+     * @param callable(T):S $onSome
+     * @param callable():N $onNone
+     * @return N|S
+     */
+    abstract public function match(callable $onSome, callable $onNone): mixed;
+
+    /**
+     * 消费内部值（仅 Some 时执行），返回原 Option，便于链式调用。
+     *
+     * @param callable(T):void $consumer
+     * @return Option<T>
+     */
+    abstract public function tap(callable $consumer): self;
 }
