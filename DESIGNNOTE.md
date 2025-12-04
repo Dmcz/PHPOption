@@ -1,4 +1,11 @@
 # DESIGN NOTE
+## 泛型字母
+* 每个方法里描述的“输入类型”和“输出类型”是独立的，所以用不同字母避免混淆.
+    * T: 表示 Option 当前承载的值
+    * U: 表示 map 的产出
+    * S: 表示行为分派时Some的返回
+    * N: 表示行为分派时None的返回
+
 ## 将Optional分化成Some和None
 * 优势
   * Option 和 Some 既是静态检查收窄的载体，也是运行时行为分派（Some::map 映射值，None::map 原样返回）的载体
