@@ -10,6 +10,7 @@ vendor/
 .env
 .DS_Store
 .phpunit*
+.phpstan/
 *.cache
 .vscode/
 /phpstan.neon

@@ -6,8 +6,16 @@ namespace Dmcz\Option;
 
 use LogicException;
 
+/**
+ * @template-covariant T
+ */
 final class Option
 {
+    /**
+     * Internal constructor; prefer the named constructors.
+     *
+     * @param T $value
+     */
     private function __construct(
         public readonly Tag $tag,
         private readonly mixed $value = null,
@@ -16,6 +24,10 @@ final class Option
 
     /**
      * Create an Option that holds a concrete value.
+     *
+     * @template S
+     * @param S $value
+     * @return self<S>
      */
     public static function some(mixed $value): self
     {
@@ -24,9 +36,12 @@ final class Option
 
     /**
      * Create an Option that holds no value.
+     *
+     * @return self<never>
      */
     public static function none(): self
     {
+        /** @var self<never> */
         return new self(Tag::None);
     }
 
@@ -51,6 +66,10 @@ final class Option
      *
      * When called on None with no default, a LogicException is thrown.
      * If a callable default is provided, it is invoked lazily only for None.
+     *
+     * @template D
+     * @param null|(callable():D)|D $default
+     * @return null|D|T
      */
     public function unwrap(mixed $default = null): mixed
     {
