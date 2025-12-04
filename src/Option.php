@@ -21,7 +21,7 @@ abstract class Option
      *
      * @template S
      * @param S $value
-     * @return Option<S>
+     * @return Some<S>
      */
     public static function some(mixed $value): Option
     {
@@ -31,7 +31,7 @@ abstract class Option
     /**
      * 创建一个 None。
      *
-     * @return Option<never>
+     * @return None
      */
     public static function none(): Option
     {
@@ -54,29 +54,29 @@ abstract class Option
     /**
      * @template U
      * @param callable(T):U $mapper
-     * @return Option<U>
+     * @return static<U>
      */
-    abstract public function map(callable $mapper): self;
+    abstract public function map(callable $mapper): static;
 
     /**
      * @template U
      * @param callable(T):Option<U> $mapper
      * @return Option<U>
      */
-    abstract public function flatMap(callable $mapper): self;
+    abstract public function flatMap(callable $mapper): Option;
 
     /**
      * @param callable(T):bool $predicate
      * @return Option<T>
      */
-    abstract public function filter(callable $predicate): self;
+    abstract public function filter(callable $predicate): Option;
 
     /**
      * @template S
      * @param callable():Option<S>|Option<S> $fallback
      * @return Option<S|T>
      */
-    abstract public function orElse(callable|Option $fallback): self;
+    abstract public function orElse(callable|Option $fallback): Option;
 
     /**
      * 获取内部值或返回备用值。
@@ -110,7 +110,7 @@ abstract class Option
      * 消费内部值（仅 Some 时执行），返回原 Option，便于链式调用。
      *
      * @param callable(T):void $consumer
-     * @return Option<T>
+     * @return static<T>
      */
-    abstract public function tap(callable $consumer): self;
+    abstract public function tap(callable $consumer): static;
 }

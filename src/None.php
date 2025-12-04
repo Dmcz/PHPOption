@@ -28,16 +28,29 @@ final class None extends Option
         return self::$instance;
     }
 
+    /**
+     * @return false
+     */
     public function isSome(): bool
     {
         return false;
     }
 
+    /**
+     * @return true
+     */
     public function isNone(): bool
     {
         return true;
     }
 
+    /**
+     * @template D
+     * @param null|(callable():D)|D $default
+     * @return D|null
+     *
+     * @throws LogicException
+     */
     public function unwrap(mixed $default = null): mixed
     {
         if (func_num_args() === 0) {
@@ -51,34 +64,55 @@ final class None extends Option
         return $default;
     }
 
-    public function map(callable $mapper): Option
+    /**
+     * @return None
+     */
+    public function map(callable $mapper): static
     {
         return $this;
     }
 
+    /**
+     * @return None
+     */
     public function flatMap(callable $mapper): Option
     {
         return $this;
     }
 
+    /**
+     * @return Option<never>
+     */
     public function filter(callable $predicate): Option
     {
         return $this;
     }
 
+    /**
+     * @template S
+     * @param callable():Option<S>|Option<S> $fallback
+     * @return Option<S>
+     *
+     * @throws LogicException
+     */
     public function orElse(callable|Option $fallback): Option
     {
         if (is_callable($fallback)) {
             $fallback = $fallback();
 
             if (! $fallback instanceof Option) {
-                throw new LogicException('flatMap 回调必须返回 Option 实例');
+                throw new LogicException('Must return Option');
             }
         }
 
         return $fallback;
     }
 
+    /**
+     * @template D
+     * @param callable():D|D $default
+     * @return D
+     */
     public function getOrElse(mixed $default): mixed
     {
         if (is_callable($default)) {
@@ -88,6 +122,12 @@ final class None extends Option
         return $default;
     }
 
+    /**
+     * @param null|callable():\Throwable $exceptionFactory
+     * @return never
+     *
+     * @throws \Throwable
+     */
     public function getOrThrow(?callable $exceptionFactory = null): mixed
     {
         if ($exceptionFactory !== null) {
@@ -98,12 +138,23 @@ final class None extends Option
         throw new LogicException('Tried to unwrap None');
     }
 
+    /**
+     * @template S
+     * @template N
+     * @param callable(never):S $onSome
+     * @param callable():N $onNone
+     * @return N
+     */
     public function match(callable $onSome, callable $onNone): mixed
     {
         return $onNone();
     }
 
-    public function tap(callable $consumer): Option
+    /**
+     * @param callable(never):void $consumer
+     * @return None
+     */
+    public function tap(callable $consumer): static
     {
         return $this;
     }

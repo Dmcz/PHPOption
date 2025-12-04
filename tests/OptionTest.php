@@ -17,6 +17,7 @@ final class OptionTest extends TestCase
 {
     public function testUnwrapReturnsStoredValueWhenSome(): void
     {
+        /** @var Option<string> $option */
         $option = Option::some('value');
 
         self::assertTrue($option->isSome());
@@ -60,7 +61,8 @@ final class OptionTest extends TestCase
     }
 
     public function testMapAndFlatMap(): void
-    {
+    {   
+        /** @var Option<int> $mapped */
         $mapped = Option::some(2)->map(fn (int $v): int => $v * 2);
         self::assertTrue($mapped->isSome());
         self::assertSame(4, $mapped->unwrap());
@@ -68,9 +70,10 @@ final class OptionTest extends TestCase
         $flatMapped = Option::some('x')->flatMap(fn (string $v): Option => Option::some($v . '!'));
         self::assertSame('x!', $flatMapped->unwrap());
 
+        /** @var Option<never> $noneMapped */
         $noneMapped = Option::none()->map(fn (): int => 1);
-        self::assertInstanceOf(None::class, $noneMapped);
         self::assertTrue($noneMapped->isNone());
+        self::assertInstanceOf(None::class, $noneMapped);
     }
 
     public function testFilter(): void
@@ -128,14 +131,17 @@ final class OptionTest extends TestCase
     public function testTapExecutesOnlyOnSome(): void
     {
         $calls = 0;
-        Option::some('x')->tap(function () use (&$calls): void {
+        $a = Option::some('x')->tap(function () use (&$calls): void {
             ++$calls;
         });
 
-        Option::none()->tap(function () use (&$calls): void {
+        self::assertSame($a, $a);
+
+        $b = Option::none()->tap(function () use (&$calls): void {
             ++$calls;
         });
 
+        self::assertSame($b, $b);
         self::assertSame(1, $calls);
     }
 }

@@ -9,7 +9,7 @@ use LogicException;
 /**
  * @template T
  * @extends Option<T>
- * @internal Only for type annotation. @Use Option::none() to obtain the singleton; do not instantiate directly.
+ * @internal Only for type annotation. @Use Option::some() to obtain the singleton; do not instantiate directly.
  */
 final class Some extends Option
 {
@@ -21,22 +21,36 @@ final class Some extends Option
         parent::__construct(Tag::Some);
     }
 
+    /**
+     * @return true
+     */
     public function isSome(): bool
     {
         return true;
     }
 
+    /**
+     * @return false
+     */
     public function isNone(): bool
     {
         return false;
     }
 
+    /**
+     * @return T
+     */
     public function unwrap(mixed $default = null): mixed
     {
         return $this->value;
     }
 
-    public function map(callable $mapper): Option
+    /**
+     * @template U
+     * @param callable(T):U $mapper
+     * @return static<U>
+     */
+    public function map(callable $mapper): static
     {
         return Option::some($mapper($this->value));
     }
@@ -62,27 +76,45 @@ final class Some extends Option
         return Option::none();
     }
 
-    public function orElse(callable|Option $fallback): Option
+    /**
+     * @return Some<T>
+     */
+    public function orElse(callable|Option $fallback): static
     {
         return $this;
     }
 
+    /**
+     * @return T
+     */
     public function getOrElse(mixed $default): mixed
     {
         return $this->value;
     }
 
+    /**
+     * @return T
+     */
     public function getOrThrow(?callable $exceptionFactory = null): mixed
     {
         return $this->value;
     }
 
+    /**
+     * @template S
+     * @param callable(T):S $onSome
+     * @param callable():mixed $onNone
+     * @return S
+     */
     public function match(callable $onSome, callable $onNone): mixed
     {
         return $onSome($this->value);
     }
 
-    public function tap(callable $consumer): Option
+    /**
+     * @return Some<T>
+     */
+    public function tap(callable $consumer): static
     {
         $consumer($this->value);
 
